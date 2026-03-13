@@ -1,0 +1,90 @@
+﻿Environment configuration loaded.
+Database connection established successfully!
+Running Database Automigrations...
+Database migration completed!
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health                   --> main.main.func1 (3 handlers)
+[GIN-debug] POST   /users/register           --> github.com/LilyPartridge7/CareHelp-SG/backend/internal/handlers.(*UserHandler).Register-fm (3 handlers)
+[GIN-debug] POST   /users/login              --> github.com/LilyPartridge7/CareHelp-SG/backend/internal/handlers.(*UserHandler).Login-fm (3 handlers)
+[GIN-debug] POST   /users/google-login       --> github.com/LilyPartridge7/CareHelp-SG/backend/internal/handlers.(*UserHandler).GoogleLogin-fm (3 handlers)
+[GIN-debug] GET    /posts                    --> github.com/LilyPartridge7/CareHelp-SG/backend/internal/handlers.(*PostHandler).ListPosts-fm (3 handlers)
+[GIN-debug] GET    /posts/:id                --> github.com/LilyPartridge7/CareHelp-SG/backend/internal/handlers.(*PostHandler).GetPost-fm (3 handlers)
+[GIN-debug] GET    /posts/:post_id/comments  --> github.com/LilyPartridge7/CareHelp-SG/backend/internal/handlers.(*CommentHandler).GetPostComments-fm (3 handlers)
+go : panic: ':post_id' 
+in new path '/posts/:po
+st_id/comments' 
+conflicts with 
+existing wildcard 
+':id' in existing 
+prefix '/posts/:id'
+At line:1 char:1
++ go run 
+cmd/server/main.go 
+2>&1 | Out-File 
+-Encoding utf8 
+error.log
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (panic: ':post   
+ _i...ix '/posts/:i    
+d':String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+
+goroutine 1 [running]:
+github.com/gin-gonic/gi
+n.(*node).addRoute(0x7f
+f69d207e7d?, 
+{0x5129c648960, 0x18}, 
+{0x5129c622ac8, 0x3, 
+0x3})
+	C:/Users/DELL/go/pkg/m
+od/github.com/gin-gonic
+/gin@v1.12.0/tree.go:23
+0 +0xb5a
+github.com/gin-gonic/gi
+n.(*Engine).addRoute(0x
+5129c8c0380, 
+{0x7ff69d207e7d, 0x3}, 
+{0x5129c648960, 0x18}, 
+{0x5129c622ac8, 0x3, 
+0x3})
+	C:/Users/DELL/go/pkg/m
+od/github.com/gin-gonic
+/gin@v1.12.0/gin.go:377
+ +0x252
+github.com/gin-gonic/gi
+n.(*RouterGroup).handle
+(0x5129c8c0380, 
+{0x7ff69d207e7d, 0x3}, 
+{0x7ff69d225ae0?, 
+0x1?}, {0x5129cb04138, 
+0x1, 0x7ff69d2631d8?})
+	C:/Users/DELL/go/pkg/m
+od/github.com/gin-gonic
+/gin@v1.12.0/routergrou
+p.go:89 +0x13e
+github.com/gin-gonic/gi
+n.(*RouterGroup).GET(..
+.)
+	C:/Users/DELL/go/pkg/m
+od/github.com/gin-gonic
+/gin@v1.12.0/routergrou
+p.go:117
+main.main()
+	C:/Users/DELL/Download
+s/CareHelp-SG-main/Care
+Help-SG-main/backend/cm
+d/server/main.go:75 
++0xa9b
+exit status 2

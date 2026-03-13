@@ -1,0 +1,60 @@
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: carehelp_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: carehelp_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - carehelp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: carehelp_backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=carehelp_db
+      - DB_PORT=5432
+      - JWT_SECRET=supersecretprofessionaljwtkeythatissecure123
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - carehelp-network
+    volumes:
+      - ./backend/uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: carehelp_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - carehelp-network
+
+networks:
+  carehelp-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

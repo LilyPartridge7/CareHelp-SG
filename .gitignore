@@ -1,0 +1,38 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# Env files
+.env
+backend/.env
+
+# Dependencies
+frontend/node_modules/
+node_modules/
+
+# Uploads
+backend/uploads/
+
+# Docs folder
+docs/
+
+# Frontend auto-generated readme
+frontend/README.md
+
+# Editor/IDE
+.idea/
+.vscode/
+.gemini/
+
+# OS junk
+.DS_Store
+Thumbs.db
