@@ -117,7 +117,7 @@ const Login: React.FC = () => {
                                 transition: 'all 0.3s ease',
                                 '&:hover': {
                                     backgroundColor: 'primary.light',
-                                    color: 'white',
+                                    color: 'primary.contrastText',
                                     borderColor: 'primary.light',
                                     transform: 'scale(1.05)',
                                     boxShadow: '0 4px 15px rgba(24, 118, 209, 0.4)'

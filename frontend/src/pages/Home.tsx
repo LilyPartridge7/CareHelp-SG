@@ -2,20 +2,22 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Container, Typography, Box, CircularProgress, Alert, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions, IconButton, Paper, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
+import TagIcon from '@mui/icons-material/Tag';
 import api from '../api/axiosConfig';
 import { useSelector, useDispatch } from 'react-redux';
 import { openCreatePostModal, closeCreatePostModal } from '../store/slices/uiSlice';
+import { fetchCommunities } from '../store/slices/communitySlice';
 import type { RootState } from '../store/store';
 import PostCard from '../components/PostCard';
 import { useNavigate } from 'react-router-dom';
 
 interface Post {
-    ID: number;
+    id: number;
     title: string;
     content: string;
     author_id: number;
     author?: { username: string };
-    community?: { name: string };
+    community?: { name: string; description: string };
     image_url: string;
     upvotes: number;
     dislikes: number;
@@ -23,17 +25,17 @@ interface Post {
     emoji: string;
     is_pinned: boolean;
     is_deleted_by_admin?: boolean;
-    CreatedAt: string;
+    created_at: string;
 }
 
 const Home: React.FC = () => {
     const [posts, setPosts] = useState<Post[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loadingPosts, setLoadingPosts] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     // New Post Modal State - Tracked globally so SpeedDial FAB can open it
     const createOpen = useSelector((state: RootState) => state.ui.createPostModalOpen);
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<any>();
     const [newTitle, setNewTitle] = useState('');
     const [newContent, setNewContent] = useState('');
     const [newImage, setNewImage] = useState<File | null>(null);
@@ -43,13 +45,17 @@ const Home: React.FC = () => {
 
     const [sortBy, setSortBy] = useState<string>('newest');
     const [activeTag, setActiveTag] = useState<string | null>(null);
-    const [communities, setCommunities] = useState<any[]>([]);
+    
+    // Use Centralized Community State
+    const { allCommunities, isAuthenticated } = useSelector((state: RootState) => ({
+        allCommunities: state.community.allCommunities,
+        isAuthenticated: state.auth.isAuthenticated
+    }));
     const [newCommunityId, setNewCommunityId] = useState<number>(1);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const postsRef = useRef<HTMLDivElement>(null);
 
-    const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
     const searchQuery = useSelector((state: RootState) => state.ui.searchQuery).toLowerCase();
     const navigate = useNavigate();
 
@@ -68,23 +74,20 @@ const Home: React.FC = () => {
 
     const fetchPosts = async () => {
         try {
-            const [postsRes, commRes] = await Promise.all([
-                api.get('/posts'),
-                api.get('/communities')
-            ]);
+            const postsRes = await api.get('/posts');
             setPosts(postsRes.data);
-            setCommunities(commRes.data);
             setError(null);
         } catch (err) {
             setError('Failed to load discussions.');
         } finally {
-            setLoading(false);
+            setLoadingPosts(false);
         }
     };
 
     useEffect(() => {
         fetchPosts();
-    }, []);
+        dispatch(fetchCommunities(isAuthenticated));
+    }, [isAuthenticated, dispatch]);
 
     const handleCreateSubmit = async () => {
         setCreateError(null);
@@ -95,8 +98,6 @@ const Home: React.FC = () => {
             if (newImage) {
                 const formData = new FormData();
                 formData.append('image', newImage);
-                // Hardcode upload endpoint without /api prefix if /api isn't globally configured correctly for files, 
-                // but since we updated axiosConfig to /api, it will hit /api/upload
                 const uploadRes = await api.post('/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
@@ -129,7 +130,7 @@ const Home: React.FC = () => {
         }
     };
 
-    if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}><CircularProgress color="primary" /></Box>;
+    if (loadingPosts) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}><CircularProgress color="primary" /></Box>;
 
     let filteredPosts = posts.filter(
         post => post.title.toLowerCase().includes(searchQuery) || post.content.toLowerCase().includes(searchQuery)
@@ -141,17 +142,19 @@ const Home: React.FC = () => {
         );
     }
 
-    filteredPosts = filteredPosts.sort((a, b) => {
+    filteredPosts = [...filteredPosts].sort((a, b) => {
         // Pinned posts always come first
         if (a.is_pinned && !b.is_pinned) return -1;
         if (!a.is_pinned && b.is_pinned) return 1;
 
-        if (sortBy === 'newest') return new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime();
-        if (sortBy === 'oldest') return new Date(a.CreatedAt).getTime() - new Date(b.CreatedAt).getTime();
+        if (sortBy === 'newest') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        if (sortBy === 'oldest') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         if (sortBy === 'upvotes') return b.upvotes - a.upvotes;
         if (sortBy === 'reposts') return b.repost_count - a.repost_count;
         return 0;
     });
+
+    const selectedCommunity = allCommunities.find(c => c.name === activeTag);
 
     return (
         <Container maxWidth="lg">
@@ -208,9 +211,26 @@ const Home: React.FC = () => {
                 </Box>
             )}
 
+            {/* Selected Community Header */}
+            {activeTag && selectedCommunity && (
+                <Paper elevation={0} sx={{ p: 4, mb: 4, borderRadius: 4, backgroundColor: 'primary.main', color: 'primary.contrastText', position: 'relative', overflow: 'hidden' }}>
+                    <Box sx={{ position: 'relative', zIndex: 1 }}>
+                        <Typography variant="h4" fontWeight={800} gutterBottom>
+                            c/{selectedCommunity.name}
+                        </Typography>
+                        <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 800 }}>
+                            {selectedCommunity.description || "Welcome to the community! Join the discussion and share your thoughts with others."}
+                        </Typography>
+                    </Box>
+                    <Box sx={{ position: 'absolute', right: -20, bottom: -20, opacity: 0.1, transform: 'rotate(-15deg)' }}>
+                         <TagIcon sx={{ fontSize: 180 }} />
+                    </Box>
+                </Paper>
+            )}
+
             <Box ref={postsRef} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2, scrollMarginTop: '100px' }}>
                 <Typography variant="h3" color="primary.main" sx={{ fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' } }}>
-                    {searchQuery ? `Search Results for "${searchQuery}"` : "Community Board"}
+                    {searchQuery ? `Search Results for "${searchQuery}"` : activeTag ? `Feed: c/${activeTag}` : "Community Board"}
                 </Typography>
                 {isAuthenticated && (
                     <Button variant="contained" color="primary" onClick={() => dispatch(openCreatePostModal())} sx={{ borderRadius: 6, fontWeight: 'bold' }}>
@@ -222,14 +242,14 @@ const Home: React.FC = () => {
             {/* Filter and Sort Controls */}
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4, alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {communities.map(community => (
+                    {allCommunities.map(community => (
                         <Chip
-                            key={community.ID}
-                            label={community.name || community.Name}
+                            key={community.id}
+                            label={community.name}
                             clickable
-                            color={activeTag === (community.name || community.Name) ? "primary" : "default"}
-                            variant={activeTag === (community.name || community.Name) ? "filled" : "outlined"}
-                            onClick={() => setActiveTag(activeTag === (community.name || community.Name) ? null : (community.name || community.Name))}
+                            color={activeTag === community.name ? "primary" : "default"}
+                            variant={activeTag === community.name ? "filled" : "outlined"}
+                            onClick={() => setActiveTag(activeTag === community.name ? null : community.name)}
                             sx={{ transition: 'all 0.2s', '&:hover': { transform: 'scale(1.05)' } }}
                         />
                     ))}
@@ -273,11 +293,11 @@ const Home: React.FC = () => {
                         ) : (
                             filteredPosts.map((post) => (
                                 <PostCard
-                                    key={post.ID}
-                                    id={post.ID}
+                                    key={post.id}
+                                    id={post.id}
                                     title={post.title}
                                     content={post.content}
-                                    createdAt={post.CreatedAt}
+                                    createdAt={post.created_at}
                                     imageUrl={post.image_url}
                                     upvotes={post.upvotes}
                                     dislikes={post.dislikes}
@@ -306,8 +326,8 @@ const Home: React.FC = () => {
                         {/* Sort by upvotes for true "Trending" algorithm */}
                         {[...posts].sort((a, b) => b.upvotes - a.upvotes).slice(0, 4).map(post => (
                             <Box
-                                key={post.ID}
-                                onClick={() => navigate(`/post/${post.ID}`)}
+                                key={post.id}
+                                onClick={() => navigate(`/post/${post.id}`)}
                                 sx={{
                                     mb: 2,
                                     pb: 2,
@@ -358,9 +378,9 @@ const Home: React.FC = () => {
                             label="Community"
                             onChange={(e) => setNewCommunityId(Number(e.target.value))}
                         >
-                            {communities.map((c) => (
-                                <MenuItem key={c.ID} value={c.ID}>
-                                    c/{c.name || c.Name}
+                            {allCommunities.map((c) => (
+                                <MenuItem key={c.id} value={c.id}>
+                                    c/{c.name}
                                 </MenuItem>
                             ))}
                         </Select>

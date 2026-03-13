@@ -447,7 +447,7 @@ const PostCard: React.FC<PostCardProps> = ({ id, title, content, authorName, cre
                             label="Archived Post"
                             size="small"
                             color="default"
-                            sx={{ mb: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', ml: localReposts > 0 ? 1 : 0 }}
+                            sx={{ mb: 2, borderRadius: 1, backgroundColor: 'action.hover', color: 'text.primary', ml: localReposts > 0 ? 1 : 0 }}
                         />
                     )}
 
@@ -573,8 +573,8 @@ const PostCard: React.FC<PostCardProps> = ({ id, title, content, authorName, cre
                             <MenuItem value="">Pin globally / On My Wall</MenuItem>
                         )}
                         {communities.map((community) => (
-                            <MenuItem key={community.ID} value={community.ID}>
-                                c/{community.name || community.Name || "Unknown"}
+                            <MenuItem key={community.id} value={community.id}>
+                                c/{community.name || "Unknown"}
                             </MenuItem>
                         ))}
                     </TextField>
