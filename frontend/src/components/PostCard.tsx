@@ -235,7 +235,14 @@ const PostCard: React.FC<PostCardProps> = ({ id, title, content, authorName, cre
                 await api.post(`/posts/${id}/unrepost`);
                 setLocalReposts(prev => prev - 1);
             } else {
-                await api.post(`/posts/${id}/repost`);
+                const res = await api.post(`/posts/${id}/repost`);
+                if (res.data?.message === "already reposted") {
+                    // Just sync the local state if the server already has it
+                    if (!hasRepostedLocally) {
+                        dispatch(toggleRepost(id));
+                    }
+                    return;
+                }
                 setLocalReposts(prev => prev + 1);
             }
             dispatch(toggleRepost(id));

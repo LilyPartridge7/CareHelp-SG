@@ -9,6 +9,7 @@ type InteractionRepository interface {
 	SaveInteraction(interaction *models.Interaction) error
 	RemoveInteraction(userID uint, targetID uint, targetType string, interactionType string) error
 	GetUserInteractions(userID uint) ([]models.Interaction, error)
+	CheckInteraction(userID uint, targetID uint, targetType string, interactionType string) (bool, error)
 }
 
 type interactionRepoImpl struct {
@@ -36,4 +37,10 @@ func (r *interactionRepoImpl) GetUserInteractions(userID uint) ([]models.Interac
 	var interactions []models.Interaction
 	err := r.db.Where("user_id = ?", userID).Find(&interactions).Error
 	return interactions, err
+}
+
+func (r *interactionRepoImpl) CheckInteraction(userID uint, targetID uint, targetType string, interactionType string) (bool, error) {
+	var count int64
+	err := r.db.Model(&models.Interaction{}).Where("user_id = ? AND target_id = ? AND target_type = ? AND interaction_type = ?", userID, targetID, targetType, interactionType).Count(&count).Error
+	return count > 0, err
 }

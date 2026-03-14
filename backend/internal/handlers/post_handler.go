@@ -204,15 +204,20 @@ func (h *PostHandler) UpvotePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	postID := uint(parsedPostID)
-	serviceError := h.postSvc.UpvotePost(postID)
-
-	if serviceError != nil {
-		utils.RespondError(w, http.StatusInternalServerError, "failed to upvote post")
-		return
-	}
-
 	if rawUserID := r.Context().Value("user_id"); rawUserID != nil {
 		uid := uint(rawUserID.(float64))
+		exists, _ := h.ixRepo.CheckInteraction(uid, postID, "post", "upvote")
+		if exists {
+			utils.RespondJSON(w, http.StatusOK, map[string]string{"message": "already upvoted"})
+			return
+		}
+
+		serviceError := h.postSvc.UpvotePost(postID)
+		if serviceError != nil {
+			utils.RespondError(w, http.StatusInternalServerError, "failed to upvote post")
+			return
+		}
+
 		h.ixRepo.SaveInteraction(&models.Interaction{
 			UserID: uid, TargetID: postID, TargetType: "post", InteractionType: "upvote",
 		})
@@ -222,6 +227,12 @@ func (h *PostHandler) UpvotePost(w http.ResponseWriter, r *http.Request) {
 		post, err := h.postSvc.GetPost(postID, uid, "")
 		if err == nil && post != nil && post.AuthorID != uid {
 			h.notifSvc.CreateNotification(post.AuthorID, "upvote", "Someone upvoted your post", "/post/"+strconv.Itoa(int(postID)))
+		}
+	} else {
+		serviceError := h.postSvc.UpvotePost(postID)
+		if serviceError != nil {
+			utils.RespondError(w, http.StatusInternalServerError, "failed to upvote post")
+			return
 		}
 	}
 
@@ -290,19 +301,30 @@ func (h *PostHandler) DislikePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	postID := uint(parsedPostID)
-	serviceError := h.postSvc.DislikePost(postID)
-
-	if serviceError != nil {
-		utils.RespondError(w, http.StatusInternalServerError, "failed to dislike post")
-		return
-	}
-
 	if rawUserID := r.Context().Value("user_id"); rawUserID != nil {
 		uid := uint(rawUserID.(float64))
+		exists, _ := h.ixRepo.CheckInteraction(uid, postID, "post", "dislike")
+		if exists {
+			utils.RespondJSON(w, http.StatusOK, map[string]string{"message": "already disliked"})
+			return
+		}
+
+		serviceError := h.postSvc.DislikePost(postID)
+		if serviceError != nil {
+			utils.RespondError(w, http.StatusInternalServerError, "failed to dislike post")
+			return
+		}
+
 		h.ixRepo.SaveInteraction(&models.Interaction{
 			UserID: uid, TargetID: postID, TargetType: "post", InteractionType: "dislike",
 		})
 		h.ixRepo.RemoveInteraction(uid, postID, "post", "upvote")
+	} else {
+		serviceError := h.postSvc.DislikePost(postID)
+		if serviceError != nil {
+			utils.RespondError(w, http.StatusInternalServerError, "failed to dislike post")
+			return
+		}
 	}
 
 	utils.RespondJSON(w, http.StatusOK, map[string]string{"message": "post disliked successfully"})
@@ -341,18 +363,29 @@ func (h *PostHandler) RepostPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	postID := uint(parsedPostID)
-	serviceError := h.postSvc.RepostPost(postID)
-
-	if serviceError != nil {
-		utils.RespondError(w, http.StatusInternalServerError, "failed to repost post")
-		return
-	}
-
 	if rawUserID := r.Context().Value("user_id"); rawUserID != nil {
 		uid := uint(rawUserID.(float64))
+		exists, _ := h.ixRepo.CheckInteraction(uid, postID, "post", "repost")
+		if exists {
+			utils.RespondJSON(w, http.StatusOK, map[string]string{"message": "already reposted"})
+			return
+		}
+
+		serviceError := h.postSvc.RepostPost(postID)
+		if serviceError != nil {
+			utils.RespondError(w, http.StatusInternalServerError, "failed to repost post")
+			return
+		}
+
 		h.ixRepo.SaveInteraction(&models.Interaction{
 			UserID: uid, TargetID: postID, TargetType: "post", InteractionType: "repost",
 		})
+	} else {
+		serviceError := h.postSvc.RepostPost(postID)
+		if serviceError != nil {
+			utils.RespondError(w, http.StatusInternalServerError, "failed to repost post")
+			return
+		}
 	}
 
 	utils.RespondJSON(w, http.StatusOK, map[string]string{"message": "post reposted successfully"})

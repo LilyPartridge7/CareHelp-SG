@@ -7,7 +7,7 @@ import api from '../api/axiosConfig';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../store/store';
 import { useNavigate } from 'react-router-dom';
-import { loginSuccess, logout } from '../store/slices/authSlice'; // Re-use this to update token/username if needed
+import { loginSuccess, logout, syncInteractions } from '../store/slices/authSlice'; // Re-use this to update token/username if needed
 import PostCard from '../components/PostCard';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -66,6 +66,15 @@ const Profile: React.FC = () => {
             const res = await api.get('/users/profile');
             setProfile(res.data.profile);
             setEditEmail(res.data.profile?.email || '');
+
+            // Sync interactions to Redux
+            dispatch(syncInteractions({
+                upvotedPosts: res.data.upvotedPosts,
+                dislikedPosts: res.data.dislikedPosts,
+                repostedPosts: res.data.repostedPosts,
+                reactedPosts: res.data.reactedPosts,
+                lovedComments: res.data.lovedComments
+            }));
 
             // Fetch all posts so we can filter for user's reposted history
             const postsRes = await api.get('/posts');

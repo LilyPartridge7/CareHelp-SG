@@ -24,6 +24,9 @@ func (m *MockInteractionRepo) RemoveInteraction(userID uint, targetID uint, targ
 func (m *MockInteractionRepo) GetUserInteractions(userID uint) ([]models.Interaction, error) {
 	return nil, nil
 }
+func (m *MockInteractionRepo) CheckInteraction(userID uint, targetID uint, targetType string, interactionType string) (bool, error) {
+	return false, nil
+}
 
 // MockPostService implements services.PostService strictly for testing
 type MockPostService struct {

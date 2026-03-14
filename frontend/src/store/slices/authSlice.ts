@@ -121,10 +121,38 @@ export const authSlice = createSlice({
                 state.lovedComments.push(id);
             }
             localStorage.setItem('lovedComments', JSON.stringify(current(state).lovedComments));
+        },
+        syncInteractions: (state, action: PayloadAction<{
+            upvotedPosts?: number[],
+            dislikedPosts?: number[],
+            repostedPosts?: number[],
+            reactedPosts?: Record<number, string>,
+            lovedComments?: number[]
+        }>) => {
+            if (action.payload.upvotedPosts) {
+                state.upvotedPosts = action.payload.upvotedPosts;
+                localStorage.setItem('upvotedPosts', JSON.stringify(state.upvotedPosts));
+            }
+            if (action.payload.dislikedPosts) {
+                state.dislikedPosts = action.payload.dislikedPosts;
+                localStorage.setItem('dislikedPosts', JSON.stringify(state.dislikedPosts));
+            }
+            if (action.payload.repostedPosts) {
+                state.repostedPosts = action.payload.repostedPosts;
+                localStorage.setItem('repostedPosts', JSON.stringify(state.repostedPosts));
+            }
+            if (action.payload.reactedPosts) {
+                state.reactedPosts = action.payload.reactedPosts;
+                localStorage.setItem('reactedPosts', JSON.stringify(state.reactedPosts));
+            }
+            if (action.payload.lovedComments) {
+                state.lovedComments = action.payload.lovedComments;
+                localStorage.setItem('lovedComments', JSON.stringify(state.lovedComments));
+            }
         }
     },
 });
 
-export const { loginSuccess, logout, toggleUpvote, toggleDislike, toggleRepost, toggleReaction, toggleLoveComment } = authSlice.actions;
+export const { loginSuccess, logout, toggleUpvote, toggleDislike, toggleRepost, toggleReaction, toggleLoveComment, syncInteractions } = authSlice.actions;
 
 export default authSlice.reducer;
