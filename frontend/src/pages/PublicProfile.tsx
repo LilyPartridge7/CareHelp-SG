@@ -105,8 +105,8 @@ const PublicProfile: React.FC = () => {
                         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
                     }).map(post => (
                         <PostCard
-                            key={post.ID}
-                            id={post.ID}
+                            key={post.id}
+                            id={post.id}
                             title={post.title}
                             authorName={post.author?.username || 'Unknown User'}
                             content={post.content}
@@ -114,7 +114,7 @@ const PublicProfile: React.FC = () => {
                             dislikes={post.dislikes}
                             repostCount={post.repost_count}
                             communityName={post.community?.name || 'General'}
-                            createdAt={post.CreatedAt}
+                            createdAt={post.created_at}
                             imageUrl={post.image_url}
                             emoji={post.emoji}
                             onDeleteRefresh={() => { }}

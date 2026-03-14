@@ -17,13 +17,13 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 
 interface UserProfile {
-    ID: number;
+    id: number;
     username: string;
     email: string;
     role: string;
     profile_picture_url: string;
     organization: string;
-    CreatedAt: string;
+    created_at: string;
     posts?: any[];
     comments?: any[];
 }
@@ -268,7 +268,7 @@ const Profile: React.FC = () => {
                         <Box>
                             <Typography variant="overline" color="text.secondary" fontWeight="bold">Member Since</Typography>
                             <Typography variant="body2">
-                                {profile ? new Date(profile.CreatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
+                                {profile ? new Date(profile.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
                             </Typography>
                         </Box>
 
@@ -306,15 +306,15 @@ const Profile: React.FC = () => {
                                         if (a.is_pinned && !b.is_pinned) return -1;
                                         if (!a.is_pinned && b.is_pinned) return 1;
                                         // Otherwise sort by newest
-                                        return new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime();
+                                        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
                                     })
                                     .map(post => (
                                         <PostCard
-                                            key={post.ID}
-                                            id={post.ID}
+                                            key={post.id}
+                                            id={post.id}
                                             title={post.title}
                                             content={post.content}
-                                            createdAt={post.CreatedAt}
+                                            createdAt={post.created_at}
                                             imageUrl={post.image_url}
                                             upvotes={post.upvotes}
                                             dislikes={post.dislikes}
@@ -336,10 +336,10 @@ const Profile: React.FC = () => {
                                 <Typography color="text.secondary" align="center">You haven't left any comments yet.</Typography>
                             ) : (
                                 profile.comments.map(comment => (
-                                    <Paper key={comment.ID} elevation={0} sx={{ p: 2, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                    <Paper key={comment.id} elevation={0} sx={{ p: 2, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                                         <Typography variant="body2">{comment.content}</Typography>
                                         <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                                            Commented on {new Date(comment.CreatedAt).toLocaleDateString()}
+                                            Commented on {new Date(comment.created_at).toLocaleDateString()}
                                         </Typography>
                                     </Paper>
                                 ))
@@ -352,13 +352,13 @@ const Profile: React.FC = () => {
                             {(!repostedPosts || repostedPosts.length === 0) ? (
                                 <Typography color="text.secondary" align="center">You haven't reposted any discussions yet.</Typography>
                             ) : (
-                                allPosts.filter(post => repostedPosts.includes(post.ID)).map(post => (
+                                allPosts.filter(post => repostedPosts.includes(post.id)).map(post => (
                                     <PostCard
-                                        key={post.ID}
-                                        id={post.ID}
+                                        key={post.id}
+                                        id={post.id}
                                         title={post.title}
                                         content={post.content}
-                                        createdAt={post.CreatedAt}
+                                        createdAt={post.created_at}
                                         imageUrl={post.image_url}
                                         upvotes={post.upvotes}
                                         dislikes={post.dislikes}
@@ -380,11 +380,11 @@ const Profile: React.FC = () => {
                             ) : (
                                 archivedPosts.map(post => (
                                     <PostCard
-                                        key={post.ID}
-                                        id={post.ID}
+                                        key={post.id}
+                                        id={post.id}
                                         title={post.title}
                                         content={post.content}
-                                        createdAt={post.CreatedAt}
+                                        createdAt={post.created_at}
                                         imageUrl={post.image_url}
                                         upvotes={post.upvotes}
                                         dislikes={post.dislikes}

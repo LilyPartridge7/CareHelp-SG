@@ -13,7 +13,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ReplyIcon from '@mui/icons-material/Reply';
 
 interface Comment {
-    ID: number;
+    id: number;
     content: string;
     author_id: number;
     author?: { username: string };
@@ -22,11 +22,11 @@ interface Comment {
     is_pinned: boolean;
     loves: number;
     is_deleted_by_admin?: boolean;
-    CreatedAt: string;
+    created_at: string;
 }
 
 interface Post {
-    ID: number;
+    id: number;
     title: string;
     content: string;
     author_id: number;
@@ -38,7 +38,7 @@ interface Post {
     repost_count: number;
     emoji: string;
     is_deleted_by_admin?: boolean;
-    CreatedAt: string;
+    created_at: string;
 }
 
 const PostDetail: React.FC = () => {
@@ -121,7 +121,7 @@ const PostDetail: React.FC = () => {
             await api.post('/comments', {
                 post_id: Number(id),
                 content: newComment,
-                parent_id: replyingTo ? replyingTo.ID : undefined,
+                parent_id: replyingTo ? replyingTo.id : undefined,
             });
             setNewComment('');
             setReplyingTo(null);
@@ -162,11 +162,11 @@ const PostDetail: React.FC = () => {
     if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}><CircularProgress color="primary" /></Box>;
 
     const renderCommentNode = (comment: Comment, depth: number = 0) => {
-        const isLoved = lovedComments?.includes(comment.ID);
-        const children = comments.filter(c => c.parent_id === comment.ID).sort((a, b) => Number(b.is_pinned) - Number(a.is_pinned));
+        const isLoved = lovedComments?.includes(comment.id);
+        const children = comments.filter(c => c.parent_id === comment.id).sort((a, b) => Number(b.is_pinned) - Number(a.is_pinned));
 
         return (
-            <React.Fragment key={comment.ID}>
+            <React.Fragment key={comment.id}>
                 <Paper
                     elevation={0}
                     sx={{
@@ -187,7 +187,7 @@ const PostDetail: React.FC = () => {
                                 [OP]
                             </Typography>
                         )}
-                        {' '}on {new Date(comment.CreatedAt).toLocaleDateString()}
+                        {' '}on {new Date(comment.created_at).toLocaleDateString()}
                     </Typography>
 
                     {comment.is_deleted_by_admin ? (
@@ -196,12 +196,12 @@ const PostDetail: React.FC = () => {
                                 [Deleted by Staff]
                             </Typography>
                         </Box>
-                    ) : editingCommentId === comment.ID ? (
+                    ) : editingCommentId === comment.id ? (
                         <Box sx={{ mt: 2 }}>
                             <TextField fullWidth multiline rows={2} value={editCommentText} onChange={(e) => setEditCommentText(e.target.value)} />
                             <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                                 <Button size="small" onClick={() => setEditingCommentId(null)}>Cancel</Button>
-                                <Button size="small" variant="contained" onClick={() => handleEditCommentSubmit(comment.ID)}>Save</Button>
+                                <Button size="small" variant="contained" onClick={() => handleEditCommentSubmit(comment.id)}>Save</Button>
                             </Box>
                         </Box>
                     ) : (
@@ -214,7 +214,7 @@ const PostDetail: React.FC = () => {
                         <Button
                             size="small"
                             startIcon={isLoved ? <FavoriteIcon color="error" /> : <FavoriteBorderIcon />}
-                            onClick={() => handleLoveComment(comment.ID)}
+                            onClick={() => handleLoveComment(comment.id)}
                             sx={{ color: isLoved ? 'error.main' : 'text.secondary', minWidth: 0, textTransform: 'none' }}
                             disabled={comment.is_deleted_by_admin}
                         >
@@ -235,17 +235,17 @@ const PostDetail: React.FC = () => {
                         {isAuthenticated && !comment.is_deleted_by_admin && (
                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', flex: 1, gap: 1 }}>
                                 {currentUsername === comment.author?.username && (
-                                    <Button size="small" variant="text" color="info" onClick={() => handleEditCommentStart(comment.ID, comment.content)} sx={{ opacity: 0.6, '&:hover': { opacity: 1 } }}>
+                                    <Button size="small" variant="text" color="info" onClick={() => handleEditCommentStart(comment.id, comment.content)} sx={{ opacity: 0.6, '&:hover': { opacity: 1 } }}>
                                         Edit
                                     </Button>
                                 )}
                                 {(currentUsername === comment.author?.username || isAdmin) && (
-                                    <Button size="small" variant="text" color="error" onClick={() => handleDeleteComment(comment.ID)} sx={{ opacity: 0.6, '&:hover': { opacity: 1 } }}>
+                                    <Button size="small" variant="text" color="error" onClick={() => handleDeleteComment(comment.id)} sx={{ opacity: 0.6, '&:hover': { opacity: 1 } }}>
                                         Delete
                                     </Button>
                                 )}
                                 {(isAdmin || (post && currentUsername === post.author?.username)) && (
-                                    <Button size="small" variant="text" color="warning" onClick={() => handlePinComment(comment.ID)} sx={{ opacity: 0.6, '&:hover': { opacity: 1 } }}>
+                                    <Button size="small" variant="text" color="warning" onClick={() => handlePinComment(comment.id)} sx={{ opacity: 0.6, '&:hover': { opacity: 1 } }}>
                                         {comment.is_pinned ? "Unpin" : "Pin"}
                                     </Button>
                                 )}
@@ -277,10 +277,10 @@ const PostDetail: React.FC = () => {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {/* Main Thread Post */}
                     <PostCard
-                        id={post.ID}
+                        id={post.id}
                         title={post.title}
                         content={post.content}
-                        createdAt={post.CreatedAt}
+                        createdAt={post.created_at}
                         imageUrl={post.image_url}
                         upvotes={post.upvotes}
                         dislikes={post.dislikes}
