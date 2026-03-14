@@ -81,7 +81,16 @@ Open a terminal and go to the backend folder:
 cd CareHelp-SG-main/backend
 ```
 
-Check the `.env` file in this folder. Make sure `DB_PASSWORD` matches your actual PostgreSQL password. If you set postgres up with a different user or port, update those too.
+Check for a `.env` file in the `backend` folder. If it is missing (as it is ignored by Git for security), copy the included `.env.example` to a new file named `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Then, open `.env` and configure your credentials:
+1. **JWT_SECRET**: Set any secure string for token signing.
+2. **Database Credentials**: Update `DB_PASSWORD` and other settings to match your local PostgreSQL setup.
+3. **Cloudinary (Optional)**: Image uploads require a Cloudinary URL. If you don't have one, the app will still run perfectly for text-based posts, but image uploads will be disabled.
 
 Then install dependencies and run it:
 
