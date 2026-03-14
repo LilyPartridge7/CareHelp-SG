@@ -25,10 +25,10 @@ const safeParseJSON = (key: string, fallback: any) => {
 };
 
 const initialState: AuthState = {
-    token: Cookies.get('jwt_token') || null,
-    isAuthenticated: !!Cookies.get('jwt_token'),
-    username: Cookies.get('username') || null,
-    role: Cookies.get('user_role') || null,
+    token: localStorage.getItem('jwt_token') || Cookies.get('jwt_token') || null,
+    isAuthenticated: !!(localStorage.getItem('jwt_token') || Cookies.get('jwt_token')),
+    username: localStorage.getItem('username') || Cookies.get('username') || null,
+    role: localStorage.getItem('user_role') || Cookies.get('user_role') || null,
     upvotedPosts: safeParseJSON('upvotedPosts', []),
     dislikedPosts: safeParseJSON('dislikedPosts', []),
     repostedPosts: safeParseJSON('repostedPosts', []),
@@ -46,12 +46,17 @@ export const authSlice = createSlice({
             state.username = action.payload.username;
             if (action.payload.role) {
                 state.role = action.payload.role;
-                Cookies.set('user_role', action.payload.role, { expires: 3 });
+                Cookies.set('user_role', action.payload.role, { expires: 3, path: '/' });
+                localStorage.setItem('user_role', action.payload.role);
             }
 
             // Store in cookies for persistence (per mentor advice)
-            Cookies.set('jwt_token', action.payload.token, { expires: 3 }); // 3 days
-            Cookies.set('username', action.payload.username, { expires: 3 });
+            Cookies.set('jwt_token', action.payload.token, { expires: 3, path: '/' }); 
+            Cookies.set('username', action.payload.username, { expires: 3, path: '/' });
+            
+            // Also store in localStorage as a backup to prevent refresh logout issues
+            localStorage.setItem('jwt_token', action.payload.token);
+            localStorage.setItem('username', action.payload.username);
         },
         logout: (state) => {
             state.token = null;
@@ -64,9 +69,12 @@ export const authSlice = createSlice({
             state.reactedPosts = {};
             state.lovedComments = [];
 
-            Cookies.remove('jwt_token');
-            Cookies.remove('username');
-            Cookies.remove('user_role');
+            Cookies.remove('jwt_token', { path: '/' });
+            Cookies.remove('username', { path: '/' });
+            Cookies.remove('user_role', { path: '/' });
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('username');
+            localStorage.removeItem('user_role');
             localStorage.removeItem('upvotedPosts');
             localStorage.removeItem('dislikedPosts');
             localStorage.removeItem('repostedPosts');

@@ -16,6 +16,7 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func main() {
@@ -38,8 +39,21 @@ func main() {
 	// Retry connecting to the database (gives postgres time to start in Docker)
 	var db *gorm.DB
 	var err error
+	
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             500 * time.Millisecond, // Increase threshold to reduce noise
+			LogLevel:                  logger.Warn,           // Log level
+			IgnoreRecordNotFoundError: true,                   // Ignore ErrRecordNotFound error for logger
+			Colorful:                  true,                   // Enable color
+		},
+	)
+
 	for attempt := 1; attempt <= 5; attempt++ {
-		db, err = gorm.Open(postgres.Open(dbConfig), &gorm.Config{})
+		db, err = gorm.Open(postgres.Open(dbConfig), &gorm.Config{
+			Logger: newLogger,
+		})
 		if err == nil {
 			break
 		}

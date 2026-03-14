@@ -19,8 +19,7 @@ type UploadHandler struct {
 func NewUploadHandler() *UploadHandler {
 	svc, err := services.NewCloudinaryService()
 	if err != nil {
-		log.Printf("Warning: Failed to initialize Cloudinary service: %v", err)
-		// We still return the handler, it will just fail gracefully on upload if svc is nil or we can handle it
+		log.Printf("INFO: Cloudinary cloud storage not configured (missing CLOUDINARY_URL). Local image uploads will be disabled. This is normal for basic local development.")
 	}
 	return &UploadHandler{cloudinarySvc: svc}
 }

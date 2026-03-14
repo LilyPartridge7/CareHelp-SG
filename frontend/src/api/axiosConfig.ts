@@ -35,8 +35,11 @@ api.interceptors.response.use(
         // Only treat genuine 401 Unauthorized as auth failures.
         // Do NOT logout on 404 "user not found" — that's just a missing public profile.
         if (error.response && error.response.status === 401) {
-            Cookies.remove('jwt_token');
-            Cookies.remove('username');
+            Cookies.remove('jwt_token', { path: '/' });
+            Cookies.remove('username', { path: '/' });
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('username');
+            localStorage.removeItem('user_role');
             // If we aren't already on the login page, redirect
             if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
                 window.location.href = '/login';
