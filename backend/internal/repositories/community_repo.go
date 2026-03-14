@@ -55,7 +55,7 @@ func (repo *databaseCommunityRepo) CreateNew(newCommunity *models.Community) err
 }
 
 func (repo *databaseCommunityRepo) AddUserToCommunity(userID uint, communityID uint) error {
-	user := models.User{Model: gorm.Model{ID: userID}}
+	user := models.User{ID: userID}
 	community := models.Community{ID: communityID}
 
 	// Complex Real-World Subscriptions: Append the community to the user's Join Table relationship!
